@@ -71,17 +71,49 @@ fn main() {
 
     // ---- CMake for NFIQ2 ----
     let mut cmake = cmake::Config::new("ext/NFIQ2-2.3.0");
-    let dst = cmake
+    cmake
         .define("CMAKE_BUILD_TYPE", "Release")
         .define("CMAKE_INSTALL_PREFIX", "NFIQ2-2.3.0/install")
-        .define("BUILD_NFIQ2_CLI", "OFF")
         .define("EMBED_RANDOM_FOREST_PARAMETERS", "ON")
-        .define("EMBEDDED_RANDOM_FOREST_PARAMETER_FCT", "3")
-        .build();
+        .define("EMBEDDED_RANDOM_FOREST_PARAMETER_FCT", "3");
+
+    if is_android {
+        let target = env::var("TARGET").unwrap_or_default();
+        let ndk = env::var("ANDROID_NDK_ROOT").expect("ANDROID_NDK_ROOT not set");
+        let abi = if target.contains("aarch64") {
+            "arm64-v8a"
+        } else if target.contains("armv7") {
+            "armeabi-v7a"
+        } else {
+            panic!("Unsupported Android ABI: {}", target);
+        };
+        cmake.define("ANDROID_ABI", abi);
+        cmake.define(
+            "CMAKE_TOOLCHAIN_FILE",
+            format!("{}/build/cmake/android.toolchain.cmake", ndk),
+        );
+        cmake.define("BUILD_NFIQ2_CLI", "OFF");
+    } else {
+        cmake.define("BUILD_NFIQ2_CLI", "OFF");
+    }
+
+    let dst = cmake.build();
 
     // Define the include and library paths for NFIQ2
     let nfiq2_include_path = dst.join("build/install_staging/nfiq2/include");
     let nfiq2_lib_path = dst.join("build/install_staging/nfiq2/lib");
+
+    // On Android, OpenCV libraries are in a different location
+    let opencv_android_lib_path = if is_android {
+        let target = env::var("TARGET").unwrap_or_default();
+        let abi = android_abi_from_target(&target).expect("Unsupported Android ABI");
+        Some(dst.join(format!(
+            "build/install_staging/nfiq2/sdk/native/staticlibs/{}",
+            abi
+        )))
+    } else {
+        None
+    };
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let opencv_lib_path = out_dir.join("build/install_staging/nfiq2/lib/opencv4/3rdparty");
@@ -93,6 +125,8 @@ fn main() {
         .include(&nfiq2_include_path) // where nfiq2.hpp lives
         .include("src/cwrapper")
         .file("src/cwrapper/nfiq_wrapper.cpp") // your FFI source
+        .define("NOVERBOSE", None) // you probably don’t want stdout spam
+        .flag_if_supported("-w") // for GCC/Clang: suppress *all* warnings
         .compile("nfiq2_ffi"); // emits libnfiq2_ffi.a
 
     // 2) Link against both the wrapper and the NFIQ2 / OpenCV libs
@@ -105,6 +139,14 @@ fn main() {
         "cargo:rustc-link-search=native={}",
         opencv_lib_path.display()
     );
+
+    // Include the OpenCV libs path for Android
+    if let Some(opencv_android_lib_path) = opencv_android_lib_path {
+        println!(
+            "cargo:rustc-link-search=native={}",
+            opencv_android_lib_path.display()
+        );
+    }
 
     // if you built NFIQ2 via cmake earlier in the same build.rs, you'd also:
     println!("cargo:rustc-link-lib=static=nfiq2");
