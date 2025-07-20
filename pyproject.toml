@@ -1,0 +1,32 @@
+[project]
+name = "nfiq2-py"
+version = "0.1.2"
+description = "Python bindings for NFIQ2 fingerprint processing using Rust + UniFFI"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  { name = "Varun Chatterji", email = "varun@seventhsense.ai" }
+]
+keywords = ["fingerprint", "nfiq2", "biometrics", "rust", "uniffi"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Rust",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Seventh-Sense-Artificial-Intelligence/nfiq2-rs"
+"Repository" = "https://github.com/Seventh-Sense-Artificial-Intelligence/nfiq2-rs"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+# Point maturin to the Rust crate root
+manifest-path = "Cargo.toml"
+python-source = "bindings/python/nfiq2-py"
+module-name = "nfiq2"
+bindings = "uniffi"
+include = ["LICENSE"]
