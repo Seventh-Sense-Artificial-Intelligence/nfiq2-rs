@@ -55,19 +55,19 @@ fn main() {
 
     let source = Path::new("ext/opencv-4.10.0");
     let target = Path::new("ext/NFIQ2-2.3.0/opencv");
-    let _ = copy_dir(&source, &target).expect("failed to copy OpenCV dir");
+    copy_dir(source, target).expect("failed to copy OpenCV dir");
 
     let source = Path::new("ext/FingerJetFXOSE");
     let target = Path::new("ext/NFIQ2-2.3.0/fingerjetfxose");
-    let _ = copy_dir(&source, &target).expect("failed to copy FingerJetFXOSE dir");
+    copy_dir(source, target).expect("failed to copy FingerJetFXOSE dir");
 
     let source = Path::new("ext/digestpp");
     let target = Path::new("ext/NFIQ2-2.3.0/digestpp");
-    let _ = copy_dir(&source, &target).expect("failed to copy FingerJetFXOSE dir");
+    copy_dir(source, target).expect("failed to copy FingerJetFXOSE dir");
 
     let source = Path::new("ext/libbiomeval-10.0");
     let target = Path::new("ext/NFIQ2-2.3.0/libbiomeval");
-    let _ = copy_dir(&source, &target).expect("failed to copy libbiomeval-10.0 dir");
+    copy_dir(source, target).expect("failed to copy libbiomeval-10.0 dir");
 
     // ---- CMake for NFIQ2 ----
     let mut cmake = cmake::Config::new("ext/NFIQ2-2.3.0");
@@ -108,11 +108,17 @@ fn main() {
 
     // if you built NFIQ2 via cmake earlier in the same build.rs, you'd also:
     println!("cargo:rustc-link-lib=static=nfiq2");
-    println!("cargo:rustc-link-lib=static=opencv_core");
-    println!("cargo:rustc-link-lib=static=opencv_imgproc");
-    println!("cargo:rustc-link-lib=static=opencv_imgcodecs");
     println!("cargo:rustc-link-lib=static=opencv_ml");
+    println!("cargo:rustc-link-lib=static=opencv_imgcodecs");
+    println!("cargo:rustc-link-lib=static=opencv_imgproc");
+    println!("cargo:rustc-link-lib=static=opencv_core");
     println!("cargo:rustc-link-lib=static=FRFXLL_static");
+
+    if is_linux {
+        println!("cargo:rustc-link-lib=dylib=stdc++");
+        println!("cargo:rustc-link-lib=dylib=z");
+    }
+
     // ...and link-search to wherever CMake put its .a files:
 
     if is_macos {

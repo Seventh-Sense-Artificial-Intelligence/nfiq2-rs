@@ -123,7 +123,8 @@ impl Nfiq2 {
             let id_slice = std::slice::from_raw_parts(ids_ptr, count);
             let val_slice = std::slice::from_raw_parts(vals_ptr, count);
             for i in 0..count {
-                let s = CStr::from_ptr(id_slice[i]).to_str()
+                let s = CStr::from_ptr(id_slice[i])
+                    .to_str()
                     .map_err(|_| Nfiq2Error::ComputeFailed(-1))?
                     .to_string();
 
