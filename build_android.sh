@@ -87,6 +87,11 @@ fi
 # Build the aar file
 echo "📦 Building Android AAR..."
 cd bindings/android
+
+# If any existing AAR file exists, remove it
+echo "🗑️ Removing any old AARs…"
+rm -f app/build/outputs/aar/*.aar
+
 ./gradlew :app:assembleRelease
 if [ $? -ne 0 ]; then
   echo "❌ Failed to build Android AAR"
