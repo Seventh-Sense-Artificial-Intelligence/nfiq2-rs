@@ -171,7 +171,6 @@ fn main() {
     if is_macos {
         println!("cargo:rustc-link-lib=framework=Accelerate");
         println!("cargo:rustc-link-lib=framework=OpenCL");
-        println!("cargo:rustc-link-lib=static=tegra_hal");
         println!("cargo:rustc-link-lib=static=zlib");
     }
 
