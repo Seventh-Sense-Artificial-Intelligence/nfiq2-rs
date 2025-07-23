@@ -161,6 +161,11 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=z");
     }
 
+    if is_android {
+        println!("cargo:rustc-link-lib=z");
+        println!("cargo:rustc-link-lib=android");
+    }
+
     // ...and link-search to wherever CMake put its .a files:
 
     if is_macos {

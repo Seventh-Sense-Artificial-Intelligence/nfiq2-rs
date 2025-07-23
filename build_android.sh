@@ -70,7 +70,7 @@ TARGET_DIR="bindings/android/app/src/main/java/com/sensecrypt/sdk"
 
 # Old and new package names
 OLD_PACKAGE="package uniffi.nfiq2"
-NEW_PACKAGE="package com.sensecrypt.sdk"
+NEW_PACKAGE="package com.sensecrypt.sdk.nfiq2"
 
 # Recursively find all .kt files and replace the package line
 echo "🔍 Replacing package '$OLD_PACKAGE' with '$NEW_PACKAGE' in $TARGET_DIR"
@@ -103,4 +103,6 @@ if [ -z "$AAR_FILE" ]; then
   echo "❌ No AAR file found"
   exit 1
 fi
-mv "$AAR_FILE" "app/build/outputs/aar/nfiq2-sdk.aar"
+
+# Copy the AAR file to the dist directory
+mv "$AAR_FILE" "../../dist/nfiq2-sdk.aar"
