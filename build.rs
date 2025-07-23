@@ -85,12 +85,12 @@ fn main() {
         } else if target.contains("armv7") {
             "armeabi-v7a"
         } else {
-            panic!("Unsupported Android ABI: {}", target);
+            panic!("Unsupported Android ABI: {target}");
         };
         cmake.define("ANDROID_ABI", abi);
         cmake.define(
             "CMAKE_TOOLCHAIN_FILE",
-            format!("{}/build/cmake/android.toolchain.cmake", ndk),
+            format!("{ndk}/build/cmake/android.toolchain.cmake"),
         );
         cmake.define("BUILD_NFIQ2_CLI", "OFF");
     } else {
@@ -108,8 +108,7 @@ fn main() {
         let target = env::var("TARGET").unwrap_or_default();
         let abi = android_abi_from_target(&target).expect("Unsupported Android ABI");
         Some(dst.join(format!(
-            "build/install_staging/nfiq2/sdk/native/staticlibs/{}",
-            abi
+            "build/install_staging/nfiq2/sdk/native/staticlibs/{abi}",
         )))
     } else {
         None
