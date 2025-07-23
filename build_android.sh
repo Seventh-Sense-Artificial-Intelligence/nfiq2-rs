@@ -103,4 +103,6 @@ if [ -z "$AAR_FILE" ]; then
   echo "❌ No AAR file found"
   exit 1
 fi
-mv "$AAR_FILE" "app/build/outputs/aar/nfiq2-sdk.aar"
+
+# Copy the AAR file to the dist directory
+mv "$AAR_FILE" "../../dist/nfiq2-sdk.aar"
