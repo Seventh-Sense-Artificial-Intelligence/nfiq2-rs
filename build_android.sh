@@ -57,16 +57,16 @@ cargo build --release
 cargo run --bin uniffi-bindgen generate \
           --library "target/release/libnfiq2.${LIB_EXT}" \
           --language kotlin \
-          --out-dir bindings/android/app/src/main/java/com/sensecrypt/sdk/nfiq2
+          --out-dir bindings/android/app/src/main/java/ai/seventhsense/sdk/nfiq2
 
 # Move to sensible folder without uniffi opinionation
-mv bindings/android/app/src/main/java/com/sensecrypt/sdk/nfiq2/uniffi/nfiq2/nfiq2.kt \
-    bindings/android/app/src/main/java/com/sensecrypt/sdk/nfiq2.kt
-rm -rf bindings/android/app/src/main/java/com/sensecrypt/sdk/nfiq2
+mv bindings/android/app/src/main/java/ai/seventhsense/sdk/nfiq2/uniffi/nfiq2/nfiq2.kt \
+    bindings/android/app/src/main/java/ai/seventhsense/sdk/nfiq2.kt
+rm -rf bindings/android/app/src/main/java/ai/seventhsense/sdk/nfiq2
 
 
 # Root directory of generated Kotlin files
-TARGET_DIR="bindings/android/app/src/main/java/com/sensecrypt/sdk"
+TARGET_DIR="bindings/android/app/src/main/java/ai/seventhsense/sdk"
 
 # Old and new package names
 OLD_PACKAGE="package uniffi.nfiq2"
