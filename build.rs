@@ -163,6 +163,7 @@ fn main() {
     if is_android {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=android");
+        println!("cargo:rustc-link-lib=c++_shared");
     }
 
     // ...and link-search to wherever CMake put its .a files:
