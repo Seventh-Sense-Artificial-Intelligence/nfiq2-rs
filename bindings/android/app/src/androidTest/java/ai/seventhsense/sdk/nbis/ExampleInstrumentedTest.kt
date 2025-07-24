@@ -1,4 +1,4 @@
-package com.sensecrypt.sdk.nfiq2
+package ai.seventhsense.sdk.nfiq2
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
