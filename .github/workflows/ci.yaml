@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test-rust:
+    name: Build and Test Rust
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Run Rust tests
+      run: cargo test --release --all
+
+  build-python-wheel:
+    name: Build Python Wheel
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Install Python + maturin
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install maturin and twine
+      run: pip install maturin twine
+
+    - name: Build wheel
+      run: maturin build --release --manifest-path Cargo.toml --out dist
+
+    - name: Patch wheel (optional)
+      run: ./patch_maturin_wheel.sh || echo "No patching needed"
+
+    - name: Check wheel integrity
+      run: twine check dist/*
+
+    - name: Upload wheel as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ubuntu-wheel
+        path: dist/*.whl
+
+  test-python-wheel:
+    name: Run Pytest for NFIQ2
+    runs-on: ubuntu-latest
+    needs: [build-python-wheel]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Download built wheel
+      uses: actions/download-artifact@v4
+      with:
+        name: ubuntu-wheel
+        path: dist/
+
+    - name: Install wheel and test dependencies
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install dist/*.whl
+        pip install -r bindings/python/tests/requirements.txt
+
+    - name: Run Pytest
+      run: |
+        source .venv/bin/activate
+        cd bindings/python/tests
+        pytest -v test_nfiq2.py
+
+  # upload-to-pypi:
+  #   name: Upload Wheel to PyPI
+  #   runs-on: ubuntu-latest
+  #   needs: [build-python-wheel]
+
+  #   steps:
+  #   - name: Download wheel artifact
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       name: ubuntu-wheel
+  #       path: dist/
+
+  #   - name: Install Twine
+  #     run: pip install twine
+
+  #   - name: Upload to PyPI
+  #     env:
+  #       TWINE_USERNAME: __token__
+  #       TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+  #     run: |
+  #       twine upload dist/*.whl
