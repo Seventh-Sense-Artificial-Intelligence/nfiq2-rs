@@ -1,3 +1,4 @@
+#![doc = include_str!("../README.md")]
 uniffi::setup_scaffolding!();
 mod errors;
 mod ffi;

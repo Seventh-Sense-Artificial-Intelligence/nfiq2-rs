@@ -41,8 +41,8 @@ extern "C" {
 
 #[derive(Debug, uniffi::Record)]
 pub struct Nfiq2Value {
-    name: String,
-    value: f64,
+    pub name: String,
+    pub value: f64,
 }
 
 /// Safe Rust view of the results
