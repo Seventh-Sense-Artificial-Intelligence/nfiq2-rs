@@ -1,4 +1,4 @@
-package com.sensecrypt.sdk.nfiq2
+package ai.seventhsense.sdk.nfiq2
 
 import org.junit.Test
 
