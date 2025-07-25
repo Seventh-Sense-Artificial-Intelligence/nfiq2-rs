@@ -65,8 +65,6 @@ fi
 
 cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$PREBUILT/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so bindings/android/app/src/main/jniLibs/armeabi-v7a/
 cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$PREBUILT/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so bindings/android/app/src/main/jniLibs/arm64-v8a/
-# cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$PREBUILT/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so bindings/android_lib/$PACKAGE_DIR_PATH/$PACKAGE_DIR_PATH/src/main/jniLibs/armeabi-v7a/
-# cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$PREBUILT/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so bindings/android_lib/$PACKAGE_DIR_PATH/$PACKAGE_DIR_PATH/src/main/jniLibs/arm64-v8a/
 
 echo "✅ Done. .so files copied to $JNILIBS_DIR"
 
