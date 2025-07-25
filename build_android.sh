@@ -127,4 +127,5 @@ if [ -z "$AAR_FILE" ]; then
 fi
 
 # Copy the AAR file to the dist directory
+mkdir -p ../../dist
 mv "$AAR_FILE" "../../dist/nfiq2-sdk.aar"
