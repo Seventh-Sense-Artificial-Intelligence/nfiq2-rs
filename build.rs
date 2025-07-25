@@ -18,18 +18,18 @@ fn android_abi_from_target(target: &str) -> Option<&'static str> {
     }
 }
 
-fn copy_dir(source: &Path, target: &Path) -> std::io::Result<()> {
+fn copy_dir(source: &Path, dest: &Path) -> std::io::Result<()> {
     // clear out any old files
-    if target.exists() {
-        fs::remove_dir_all(target)?;
+    if dest.exists() {
+        fs::remove_dir_all(dest)?;
     }
     // recreate root
-    fs::create_dir_all(target)?;
+    fs::create_dir_all(dest)?;
 
     for entry in WalkDir::new(source) {
         let entry = entry?;
         let rel_path: PathBuf = entry.path().strip_prefix(source).unwrap().into();
-        let dest_path = target.join(&rel_path);
+        let dest_path = dest.join(&rel_path);
 
         if entry.file_type().is_dir() {
             fs::create_dir_all(&dest_path)?;
@@ -54,20 +54,20 @@ fn main() {
     let is_macos = target.contains("apple") || target.contains("darwin");
 
     let source = Path::new("ext/opencv-4.10.0");
-    let target = Path::new("ext/NFIQ2-2.3.0/opencv");
-    copy_dir(source, target).expect("failed to copy OpenCV dir");
+    let dst = Path::new("ext/NFIQ2-2.3.0/opencv");
+    copy_dir(source, dst).expect("failed to copy OpenCV dir");
 
     let source = Path::new("ext/FingerJetFXOSE");
-    let target = Path::new("ext/NFIQ2-2.3.0/fingerjetfxose");
-    copy_dir(source, target).expect("failed to copy FingerJetFXOSE dir");
+    let dst = Path::new("ext/NFIQ2-2.3.0/fingerjetfxose");
+    copy_dir(source, dst).expect("failed to copy FingerJetFXOSE dir");
 
     let source = Path::new("ext/digestpp");
-    let target = Path::new("ext/NFIQ2-2.3.0/digestpp");
-    copy_dir(source, target).expect("failed to copy FingerJetFXOSE dir");
+    let dst = Path::new("ext/NFIQ2-2.3.0/digestpp");
+    copy_dir(source, dst).expect("failed to copy FingerJetFXOSE dir");
 
     let source = Path::new("ext/libbiomeval-10.0");
-    let target = Path::new("ext/NFIQ2-2.3.0/libbiomeval");
-    copy_dir(source, target).expect("failed to copy libbiomeval-10.0 dir");
+    let dst = Path::new("ext/NFIQ2-2.3.0/libbiomeval");
+    copy_dir(source, dst).expect("failed to copy libbiomeval-10.0 dir");
 
     // ---- CMake for NFIQ2 ----
     let mut cmake = cmake::Config::new("ext/NFIQ2-2.3.0");
@@ -75,26 +75,18 @@ fn main() {
         .define("CMAKE_BUILD_TYPE", "Release")
         .define("CMAKE_INSTALL_PREFIX", "NFIQ2-2.3.0/install")
         .define("EMBED_RANDOM_FOREST_PARAMETERS", "ON")
-        .define("EMBEDDED_RANDOM_FOREST_PARAMETER_FCT", "3");
+        .define("EMBEDDED_RANDOM_FOREST_PARAMETER_FCT", "3")
+        .define("BUILD_NFIQ2_CLI", "OFF");
 
     if is_android {
-        let target = env::var("TARGET").unwrap_or_default();
         let ndk = env::var("ANDROID_NDK_ROOT").expect("ANDROID_NDK_ROOT not set");
-        let abi = if target.contains("aarch64") {
-            "arm64-v8a"
-        } else if target.contains("armv7") {
-            "armeabi-v7a"
-        } else {
-            panic!("Unsupported Android ABI: {target}");
-        };
+        let abi = android_abi_from_target(&target)
+            .expect("Unsupported Android ABI. Supported ABIs: arm64-v8a, armeabi-v7a, x86_64, x86");
         cmake.define("ANDROID_ABI", abi);
         cmake.define(
             "CMAKE_TOOLCHAIN_FILE",
             format!("{ndk}/build/cmake/android.toolchain.cmake"),
         );
-        cmake.define("BUILD_NFIQ2_CLI", "OFF");
-    } else {
-        cmake.define("BUILD_NFIQ2_CLI", "OFF");
     }
 
     let dst = cmake.build();
@@ -105,7 +97,6 @@ fn main() {
 
     // On Android, OpenCV libraries are in a different location
     let opencv_android_lib_path = if is_android {
-        let target = env::var("TARGET").unwrap_or_default();
         let abi = android_abi_from_target(&target).expect("Unsupported Android ABI");
         Some(dst.join(format!(
             "build/install_staging/nfiq2/sdk/native/staticlibs/{abi}",
@@ -163,9 +154,8 @@ fn main() {
     if is_android {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=android");
+        println!("cargo:rustc-link-lib=c++_shared");
     }
-
-    // ...and link-search to wherever CMake put its .a files:
 
     if is_macos {
         println!("cargo:rustc-link-lib=framework=Accelerate");
